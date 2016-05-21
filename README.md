@@ -85,3 +85,11 @@ Nginx routes requests to `app.example.com` correctly.
 $ curl -s -H "Host: app.example.com" http://192.168.99.100/
 app
 ```
+
+## References
+
+- https://www.consul.io/
+- https://hub.docker.com/_/consul/
+- https://github.com/hashicorp/consul-template
+- http://gliderlabs.com/registrator/latest/
+- https://github.com/progrium/entrykit
