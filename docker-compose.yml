@@ -1,0 +1,45 @@
+version: '2'
+services:
+  nginx:
+    build: .
+    env_file: .env
+    environment:
+      SERVICE_NAME: router
+    ports:
+      - 80:80
+    links:
+      - consul
+    depends_on:
+      - registrator
+    restart: on-failure:10
+  consul:
+    image: consul
+    env_file: .env
+    command: agent -server -ui -client 0.0.0.0 -bootstrap-expect=1
+    restart: on-failure:10
+  registrator:
+    image: gliderlabs/registrator:latest
+    env_file: .env
+    links:
+      - consul
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock
+    command: consul://consul:8500 
+    depends_on:
+      - consul
+    restart: on-failure:10
+  app:
+    image: python:2.7-alpine
+    env_file: .env
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: web
+      SERVICE_CHECK_HTTP: /
+      SERVICE_CHECK_INTERVAL: 5s
+      SERVICE_CHECK_TIMEOUT: 3s
+    command: sh -c "echo app > /tmp/index.html; cd /tmp/; python -m SimpleHTTPServer 8080"
+    ports:
+      - 8080:8080
+    depends_on:
+      - registrator
+    restart: on-failure:10
